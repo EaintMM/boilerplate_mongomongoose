@@ -121,10 +121,11 @@ router.get("/create-and-save-person", function (req, res, next) {
 
 const createPeople = require("./myApp.js").createManyPeople;
 router.post("/create-many-people", function (req, res, next) {
-  Person.remove({}, function (err) {
+  /*
+  Person.deleteOne({}, function (err) {
     if (err) {
       return next(err);
-    }
+    } 
     // in case of incorrect function use wait timeout then respond
     let t = setTimeout(() => {
       next({ message: "timeout" });
@@ -147,6 +148,55 @@ router.post("/create-many-people", function (req, res, next) {
       });
     });
   });
+  */
+  // new start here
+  Person.deleteOne().then(
+    function (){
+      // in case of incorrect function use wait timeout then respond
+    let t = setTimeout(() => {
+      next({ message: "timeout" });
+    }, TIMEOUT);
+    createPeople(req.body, function (err, data) {
+      clearTimeout(t);
+      if (err) {
+        return next(err);
+      }
+      if (!data) {
+        console.log("Missing `done()` argument");
+        return next({ message: "Missing callback argument" });
+      }
+      /*Person.find({}, function (err, pers) {
+        if (err) {
+          return next(err);
+        }
+        res.json(pers);
+        Person.remove().exec();
+      }); */
+      // New model.find
+      Person.find({}).then(
+        function (pers){
+          res.json(pers);
+          console.log(pers);
+          Person.remove().exec();
+        }
+      ).catch(
+        function (err){
+          return next(err);
+        }
+      );
+
+
+    }); 
+   
+
+
+    }
+  ).catch(
+    function (err){
+      return next(err);
+    }
+  );
+
 });
 
 const findByName = require("./myApp.js").findPeopleByName;
