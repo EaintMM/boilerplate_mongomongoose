@@ -204,6 +204,28 @@ router.post("/find-all-by-name", function (req, res, next) {
   let t = setTimeout(() => {
     next({ message: "timeout" });
   }, TIMEOUT);
+  // new Person.create()
+  Person.create(req.body).then(
+    function (pers){
+      findByName(pers.name, function (err, data) {
+        clearTimeout(t);
+        if (err) {
+          return next(err);
+        }
+        if (!data) {
+          console.log("Missing `done()` argument");
+          return next({ message: "Missing callback argument" });
+        }
+        res.json(data);
+        Person.remove().exec();
+      });
+    }
+  ).catch(
+    function (err){
+      return next(err);
+    }
+  );
+/*
   Person.create(req.body, function (err, pers) {
     if (err) {
       return next(err);
@@ -220,7 +242,9 @@ router.post("/find-all-by-name", function (req, res, next) {
       res.json(data);
       Person.remove().exec();
     });
-  });
+  }); 
+  */
+
 });
 
 const findByFood = require("./myApp.js").findOneByFood;
