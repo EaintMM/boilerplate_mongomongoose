@@ -349,6 +349,33 @@ router.post("/find-edit-save", function (req, res, next) {
     next({ message: "timeout" });
   }, TIMEOUT);
   let p = new Person(req.body);
+// new 
+  p.save().then(
+    function (pers){
+      try {
+        findEdit(pers._id, function (err, data) {
+          clearTimeout(t);
+          if (err) {
+            return next(err);
+          }
+          if (!data) {
+            console.log("Missing `done()` argument");
+            return next({ message: "Missing callback argument" });
+          }
+          res.json(data);
+          p.remove();
+        });
+      } catch (e) {
+        console.log(e);
+        return next(e);
+      }
+    }
+  ).catch(
+    function (err){
+      return next(err);
+    }
+  );
+  /*
   p.save(function (err, pers) {
     if (err) {
       return next(err);
@@ -371,6 +398,7 @@ router.post("/find-edit-save", function (req, res, next) {
       return next(e);
     }
   });
+  */
 });
 
 const update = require("./myApp.js").findAndUpdate;
