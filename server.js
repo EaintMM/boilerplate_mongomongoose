@@ -253,6 +253,28 @@ router.post("/find-one-by-food", function (req, res, next) {
     next({ message: "timeout" });
   }, TIMEOUT);
   let p = new Person(req.body);
+  // new p.save()
+  p.save().then(
+    function (pers){
+      findByFood(pers.favoriteFoods[0], function (err, data) {
+        clearTimeout(t);
+        if (err) {
+          return next(err);
+        }
+        if (!data) {
+          console.log("Missing `done()` argument");
+          return next({ message: "Missing callback argument" });
+        }
+        res.json(data);
+        p.remove();
+      });
+    }
+  ).catch(
+     function (err) {
+      return next(err);
+     }
+  );
+  /*
   p.save(function (err, pers) {
     if (err) {
       return next(err);
@@ -270,6 +292,7 @@ router.post("/find-one-by-food", function (req, res, next) {
       p.remove();
     });
   });
+  */
 });
 
 const findById = require("./myApp.js").findPersonById;
@@ -278,6 +301,28 @@ router.get("/find-by-id", function (req, res, next) {
     next({ message: "timeout" });
   }, TIMEOUT);
   let p = new Person({ name: "test", age: 0, favoriteFoods: ["none"] });
+  // new p.save()
+  p.save().then(
+    function (pers){
+      findById(pers._id, function (err, data) {
+        clearTimeout(t);
+        if (err) {
+          return next(err);
+        }
+        if (!data) {
+          console.log("Missing `done()` argument");
+          return next({ message: "Missing callback argument" });
+        }
+        res.json(data);
+        p.remove();
+      });
+    }
+  ).catch(
+    function (err){
+      return next(err);
+    }
+  );
+  /*
   p.save(function (err, pers) {
     if (err) {
       return next(err);
@@ -295,6 +340,7 @@ router.get("/find-by-id", function (req, res, next) {
       p.remove();
     });
   });
+  */
 });
 
 const findEdit = require("./myApp.js").findEditThenSave;
