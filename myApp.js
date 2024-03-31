@@ -153,8 +153,16 @@ const removeById = (personId, done) => {
 
 const removeManyPeople = (done) => {
   const nameToRemove = "Mary";
-
-  done(null /*, data*/);
+  Person.deleteMany({name: nameToRemove}).then(
+    function (response){
+      console.log("Response is " + JSON.stringify(response));
+      done(null, JSON.stringify(response));
+    }
+  ).catch(
+    function (err){
+      return console.log(err);
+    }
+  );
 };
 
 const queryChain = (done) => {

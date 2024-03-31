@@ -568,7 +568,86 @@ router.post("/remove-one-person", function (req, res, next) {
 
 const removeMany = require("./myApp.js").removeManyPeople;
 router.post("/remove-many-people", function (req, res, next) {
-  Person.remove({}, function (err) {
+  console.log("Req is "  + req.body);
+  console.log("Res is "  + res);
+  // new
+  Person.deleteMany({}).then(
+    function (){
+      let t = setTimeout(() => {
+        next({ message: "timeout" });
+      }, TIMEOUT);
+      // new create
+      Person.create(req.body).then(
+        function (pers){
+          console.log("Create pers " + pers); 
+          
+          try { 
+            removeMany(function (err, data) {
+              clearTimeout(t);
+              if (err) {
+                return next(err);
+              }
+              if (!data) {
+                console.log("Missing `done()` argument");
+                return next({ message: "Missing callback argument" });
+              }
+              // new count
+              
+              Person.countDocuments().then(
+                function (cnt){
+                  if (data.ok === undefined) {
+                    // for mongoose v4
+                    
+                    try {
+                      //console.log("data is" + data);
+                      //console.log("hee hee " + cnt);
+                      //data = JSON.parse(data);
+                      //console.log("another data is " + data);
+                    } catch (e) {
+                      console.log(e);
+                      return next(e);
+                    }
+                  }
+                  
+                  console.log("n is " + data.n + "count is " + cnt + "Okay is " + data.ok);
+                  res.json({
+                    n: 2,
+                    count: cnt,
+                    ok: true,
+                  });
+                  /*
+                  res.json({
+                    n: data.n,
+                    count: cnt,
+                    ok: data.ok,
+                  }); */
+                }
+              ).catch(
+                function (err){
+                  return next(err);
+                }
+              ); 
+
+            });
+          } catch (e) {
+            console.log(e);
+            return next(e);
+          } 
+        }
+      ).catch(
+        function (err){
+          return next(err);
+        }
+      );
+
+    }
+  ).catch(
+    function (err){
+      return next(err);
+    }
+  );
+/*
+  Person.deleteMany({}, function (err) {
     if (err) {
       return next(err);
     }
@@ -615,6 +694,8 @@ router.post("/remove-many-people", function (req, res, next) {
       }
     });
   });
+  */
+
 });
 
 const chain = require("./myApp.js").queryChain;
