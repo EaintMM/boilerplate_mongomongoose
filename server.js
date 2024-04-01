@@ -703,6 +703,42 @@ router.post("/query-tools", function (req, res, next) {
   let t = setTimeout(() => {
     next({ message: "timeout" });
   }, TIMEOUT);
+  // new 
+  Person.deleteMany({}).then(
+    function (){
+      Person.create(req.body).then(
+        function (pers){
+          try {
+            chain(function (err, data) {
+              clearTimeout(t);
+              if (err) {
+                return next(err);
+              }
+              if (!data) {
+                console.log("Missing `done()` argument");
+                return next({ message: "Missing callback argument" });
+              }
+              res.json(data);
+            });
+          } catch (e) {
+            console.log(e);
+            return next(e);
+          }
+        }
+      ).catch(
+        function (err){
+          return next(err);
+        }
+      );
+   
+       
+    }
+  ).catch(
+    function (err){
+      return next(err);
+    }
+  );
+/*
   Person.remove({}, function (err) {
     if (err) {
       return next(err);
@@ -729,6 +765,7 @@ router.post("/query-tools", function (req, res, next) {
       }
     });
   });
+  */
 });
 
 app.use("/_api", enableCORS, router);
